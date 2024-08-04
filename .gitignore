@@ -1,0 +1,15 @@
+
+.env
+build/
+allure-report/
+
+sdop
+kis-dev
+uh-dev
+
+build
+out
+.scannerwork
+.idea
+
+.edt

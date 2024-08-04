@@ -1,0 +1,54 @@
+
+before_script:
+    - $LINE = '[Console]::OutputEncoding = [Text.Encoding]::Utf8'
+    - Invoke-Expression $LINE
+    - $LINE = '[Console]::InputEncoding = [Text.Encoding]::Utf8'
+    - Invoke-Expression $LINE
+    - chcp
+    - Write-Host "CI_PROJECT_TITLE - $CI_PROJECT_TITLE"
+    - Write-Host "CI_PROJECT_NAME - $CI_PROJECT_NAME"
+    - Write-Host "CI_COMMIT_REF_NAME - $CI_COMMIT_REF_NAME"
+    - Write-Host "CI_PIPELINE_SOURCE - $CI_PIPELINE_SOURCE"
+    - Write-Host "CI_PIPELINE_ID - $CI_PIPELINE_ID"
+    - Write-Host "CI_PROJECT_DIR - $CI_PROJECT_DIR"
+
+stages:
+    - uh-dev
+    - ut
+
+uh-dev:
+    stage: uh-dev
+    interruptible: false
+    variables:
+        GITSYNC_V8VERSION: 8.3.21.1895
+    only:
+        - schedules
+    tags:
+        - SYNC
+    script:
+        - Get-Date -Format "dd/MM/yyyy HH:mm:ss K" | Write-Host
+        - Set-Location -Path $CI_PROJECT_DIR
+        - oscript repoinit.os uh-dev https://gitlab.ru/1c/uh-dev.git d:\prj
+        - cd d:\prj\uh-dev
+        - gitsync sync --storage-user git -P -G --limit 20 "tcp://ANYSERV/UH" ".\src\cf"
+        - Set-Location -Path $CI_PROJECT_DIR
+        - Get-Date -Format "dd/MM/yyyy HH:mm:ss K" | Write-Host
+
+ut:
+    stage: ut
+    interruptible: false
+    variables:
+        GITSYNC_V8VERSION: 8.3.15.1656
+    only:
+        - schedules
+    tags:
+        - SYNC
+    script:
+        - Get-Date -Format "dd/MM/yyyy HH:mm:ss K" | Write-Host
+        - Set-Location -Path $CI_PROJECT_DIR
+        - oscript repoinit.os ut https://gitlab.ru/1c/ut.git d:\prj
+        - cd d:\prj\ut
+        - gitsync sync --storage-user git -P -G --limit 20 "tcp://ANYSERV/ut" ".\src\cf"
+        - Set-Location -Path $CI_PROJECT_DIR
+        - Get-Date -Format "dd/MM/yyyy HH:mm:ss K" | Write-Host
+
