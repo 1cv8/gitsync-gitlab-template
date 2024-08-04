@@ -13,11 +13,11 @@ before_script:
     - Write-Host "CI_PROJECT_DIR - $CI_PROJECT_DIR"
 
 stages:
-    - uh-dev
-    - ut
+    - thread1
+    - thread1
 
 uh-dev:
-    stage: uh-dev
+    stage: thread1
     interruptible: false
     variables:
         GITSYNC_V8VERSION: 8.3.21.1895
@@ -35,7 +35,7 @@ uh-dev:
         - Get-Date -Format "dd/MM/yyyy HH:mm:ss K" | Write-Host
 
 ut:
-    stage: ut
+    stage: thread1
     interruptible: false
     variables:
         GITSYNC_V8VERSION: 8.3.15.1656
@@ -52,3 +52,38 @@ ut:
         - Set-Location -Path $CI_PROJECT_DIR
         - Get-Date -Format "dd/MM/yyyy HH:mm:ss K" | Write-Host
 
+erp-dev:
+    stage: thread2
+    interruptible: false
+    variables:
+        GITSYNC_V8VERSION: 8.3.21.1895
+    only:
+        - schedules
+    tags:
+        - SYNC
+    script:
+        - Get-Date -Format "dd/MM/yyyy HH:mm:ss K" | Write-Host
+        - Set-Location -Path $CI_PROJECT_DIR
+        - oscript repoinit.os erp-dev https://gitlab.ru/1c/erp-dev.git d:\prj
+        - cd d:\prj\erp-dev
+        - gitsync sync --storage-user git -P -G --limit 20 "tcp://ANYSERV/erp" ".\src\cf"
+        - Set-Location -Path $CI_PROJECT_DIR
+        - Get-Date -Format "dd/MM/yyyy HH:mm:ss K" | Write-Host
+
+ssl:
+    stage: thread2
+    interruptible: false
+    variables:
+        GITSYNC_V8VERSION: 8.3.21.1895
+    only:
+        - schedules
+    tags:
+        - SYNC
+    script:
+        - Get-Date -Format "dd/MM/yyyy HH:mm:ss K" | Write-Host
+        - Set-Location -Path $CI_PROJECT_DIR
+        - oscript repoinit.os ssl https://gitlab.ru/1c/ssl.git d:\prj
+        - cd d:\prj\ssl
+        - gitsync sync --storage-user git -P -G --limit 20 "tcp://ANYSERV/ssl" ".\src\cf"
+        - Set-Location -Path $CI_PROJECT_DIR
+        - Get-Date -Format "dd/MM/yyyy HH:mm:ss K" | Write-Host
